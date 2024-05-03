@@ -1,4 +1,4 @@
-package lk.ac.uwu.cvidetection;
+package lk.ac.uwu.cvi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
