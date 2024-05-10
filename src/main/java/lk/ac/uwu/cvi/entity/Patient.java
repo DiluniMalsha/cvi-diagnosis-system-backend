@@ -14,15 +14,19 @@ public class Patient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
-    private String characterId;
+    private String registrationId;
+    @CreationTimestamp
+    private LocalDateTime registeredDateTime;
     private String firstName;
     private String lastName;
+    private LocalDateTime dateOfBirth;
     private Integer age;
     private String address;
+    private Integer gestationAtDelivery;
+    private Double birthWeight;
     private String motherName;
     private Integer motherAge;
     private String fatherName;
     private Integer fatherAge;
-    @CreationTimestamp
-    private LocalDateTime registeredDateTime;
+    private String otherComorbidity;
 }

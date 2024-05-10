@@ -14,5 +14,6 @@ public class Stimuli {
     @Enumerated(EnumType.STRING)
     private Characteristic characteristic;
     private Integer totalTime;
+    private String resourceName;
     private String resource;
 }

@@ -1,6 +1,7 @@
 package lk.ac.uwu.cvi.entity;
 
 import jakarta.persistence.*;
+import lk.ac.uwu.cvi.enums.Characteristic;
 import lk.ac.uwu.cvi.enums.DiagnosisStatus;
 import lombok.Data;
 
@@ -15,6 +16,8 @@ public class DiagnosisStimuli {
     private Long id;
     @Enumerated(EnumType.STRING)
     private DiagnosisStatus status;
+    @Enumerated(EnumType.STRING)
+    private Characteristic characteristic;
     private Double score;
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
