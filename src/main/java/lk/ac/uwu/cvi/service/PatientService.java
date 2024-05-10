@@ -1,4 +1,8 @@
 package lk.ac.uwu.cvi.service;
 
-public interface PatientService {
+import org.springframework.stereotype.Service;
+
+@Service
+public interface PatientService extends CommonService {
+
 }
