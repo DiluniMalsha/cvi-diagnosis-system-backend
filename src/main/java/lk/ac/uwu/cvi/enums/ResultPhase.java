@@ -1,6 +1,6 @@
 package lk.ac.uwu.cvi.enums;
 
-public enum DiagnosisResult {
+public enum ResultPhase {
     NONE,
     LOW,
     MID,
