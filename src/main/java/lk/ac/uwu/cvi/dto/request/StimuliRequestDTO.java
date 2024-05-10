@@ -2,11 +2,13 @@ package lk.ac.uwu.cvi.dto.request;
 
 import lk.ac.uwu.cvi.enums.Characteristic;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 @Data
-public class StimuliRequestDTO {
+@EqualsAndHashCode(callSuper = true)
+public class StimuliRequestDTO extends RequestDTO {
     private Long id;
     private Characteristic characteristic;
     private Integer totalTime;

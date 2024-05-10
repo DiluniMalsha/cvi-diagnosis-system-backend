@@ -1,11 +1,14 @@
 package lk.ac.uwu.cvi.dto.request;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 @Data
-public class DiagnosisRequestDTO {
+@EqualsAndHashCode(callSuper = true)
+public class DiagnosisRequestDTO extends RequestDTO {
     private Long id;
+    private Long patientId;
     private List<DiagnosisStimuliRequestDTO> stimulus;
 }
