@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class StimuliFrame {
+public class ResourceFrame {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

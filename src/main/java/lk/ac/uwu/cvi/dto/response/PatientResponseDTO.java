@@ -2,6 +2,7 @@ package lk.ac.uwu.cvi.dto.response;
 
 import lk.ac.uwu.cvi.enums.ResultPhase;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public record PatientResponseDTO(Long id,
                                  LocalDateTime registeredDateTime,
                                  String firstName,
                                  String lastName,
-                                 LocalDateTime dateOfBirth,
+                                 LocalDate dateOfBirth,
                                  Integer age,
                                  String address,
                                  Integer gestationAtDelivery,

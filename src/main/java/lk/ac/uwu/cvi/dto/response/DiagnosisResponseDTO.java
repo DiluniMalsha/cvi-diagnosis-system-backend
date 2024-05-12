@@ -17,5 +17,5 @@ public record DiagnosisResponseDTO(Long id,
                                    Double score,
                                    ResultPhase phase,
                                    DiagnosisStatus status,
-                                   List<DiagnosisStimuliResponseDTO> stimulus) {
+                                   List<DiagnosisCharacteristicResponseDTO> characteristicDetails) {
 }
