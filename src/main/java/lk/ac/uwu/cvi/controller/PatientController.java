@@ -33,6 +33,7 @@ public class PatientController {
         return ResponseEntity.ok(patientService.search(request, pageable));
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/next-reg-id")
     public ResponseEntity<ResponseDTO> getNextRegistrationId() {
         return ResponseEntity.ok(patientService.getNextRegistrationId());
