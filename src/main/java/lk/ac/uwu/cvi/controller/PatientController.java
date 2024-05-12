@@ -29,4 +29,9 @@ public class PatientController {
     public ResponseEntity<ResponseDTO> getById(@RequestBody PatientRequestDTO request, Pageable pageable) {
         return ResponseEntity.ok(patientService.search(request, pageable));
     }
+
+    @GetMapping("/next-reg-id")
+    public ResponseEntity<ResponseDTO> getNextRegistrationId() {
+        return ResponseEntity.ok(patientService.getNextRegistrationId());
+    }
 }

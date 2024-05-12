@@ -77,4 +77,11 @@ public class PatientServiceImpl implements PatientService {
                 diagnoses
         );
     }
+
+    @Override
+    public ResponseDTO getNextRegistrationId() {
+        Patient patient = patientRepository.findTopByOrderByIdDesc();
+        return this.getSuccessResponse("Registration Id Generated Successfully!",
+                patient == null ? "P001" : "P00" + (Integer.parseInt(patient.getRegistrationId().substring(3)) + 1));
+    }
 }
