@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, Long> {
     Page<Patient> findAll(Specification<Patient> spec, Pageable pageable);
+
+    Patient findTopByOrderByIdDesc();
 }

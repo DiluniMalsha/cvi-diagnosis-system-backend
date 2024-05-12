@@ -4,5 +4,5 @@ public record DiagnoseStimuliConductResponseDTO(Boolean exists,
                                                 Long characteristic,
                                                 String file,
                                                 String screenSize,
-                                                Long child) {
+                                                Long diagnosisStimuliId) {
 }
