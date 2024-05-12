@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-public class DiagnosisStimuli {
+public class DiagnosisCharacteristic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,5 +24,5 @@ public class DiagnosisStimuli {
     @ManyToOne
     private Diagnosis diagnosis;
     @ManyToOne
-    private Stimuli stimuli;
+    private Resource resource;
 }

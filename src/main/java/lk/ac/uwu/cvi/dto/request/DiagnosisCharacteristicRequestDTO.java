@@ -6,8 +6,8 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DiagnosisStimuliRequestDTO extends RequestDTO {
+public class DiagnosisCharacteristicRequestDTO extends RequestDTO {
     private Long id;
-    private Long stimuliId;
+    private Long resourceId;
     private Characteristic characteristic;
 }

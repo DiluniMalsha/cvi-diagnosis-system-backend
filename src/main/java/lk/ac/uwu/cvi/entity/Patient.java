@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,7 +20,7 @@ public class Patient {
     private LocalDateTime registeredDateTime;
     private String firstName;
     private String lastName;
-    private LocalDateTime dateOfBirth;
+    private LocalDate dateOfBirth;
     private Integer age;
     private String address;
     private Integer gestationAtDelivery;

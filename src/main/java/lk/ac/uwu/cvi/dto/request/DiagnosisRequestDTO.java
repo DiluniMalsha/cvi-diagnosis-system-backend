@@ -10,5 +10,5 @@ import java.util.List;
 public class DiagnosisRequestDTO extends RequestDTO {
     private Long id;
     private Long patientId;
-    private List<DiagnosisStimuliRequestDTO> stimulus;
+    private List<DiagnosisCharacteristicRequestDTO> characteristicDetails;
 }

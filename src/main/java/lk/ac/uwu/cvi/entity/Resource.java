@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Stimuli {
+public class Resource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,5 +15,5 @@ public class Stimuli {
     private Characteristic characteristic;
     private Integer totalTime;
     private String resourceName;
-    private String resource;
+    private String resourceUrl;
 }

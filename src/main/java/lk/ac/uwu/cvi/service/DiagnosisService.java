@@ -13,11 +13,11 @@ public interface DiagnosisService extends CommonService {
     List<DiagnosisResponseDTO> getDiagnosesForPatient(Long patientId);
 
     @Transactional
-    ResponseDTO startDiagnosisStimuliTest(Long id);
+    ResponseDTO startDiagnosisCharacteristicTest(Long id);
 
     @Transactional
-    ResponseDTO endDiagnosisStimuliTest(RequestDTO request);
+    ResponseDTO endDiagnosisCharacteristicTest(RequestDTO request);
 
-    ResponseDTO checkDiagnoseStimuliConductStatus();
+    ResponseDTO checkDiagnosisConductStatus();
 
 }

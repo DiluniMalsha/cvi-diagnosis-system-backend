@@ -8,10 +8,10 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StimuliRequestDTO extends RequestDTO {
+public class ResourceRequestDTO extends RequestDTO {
     private Long id;
     private Characteristic characteristic;
     private Integer totalTime;
     private String resource;
-    private List<StimuliFrameRequestDTO> frames;
+    private List<ResourceFrameRequestDTO> frames;
 }

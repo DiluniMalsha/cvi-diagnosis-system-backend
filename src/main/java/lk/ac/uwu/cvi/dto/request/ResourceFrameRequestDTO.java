@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StimuliFrameRequestDTO extends RequestDTO {
+public class ResourceFrameRequestDTO extends RequestDTO {
     private Long id;
     private Integer time;
     private Integer frameNumber;

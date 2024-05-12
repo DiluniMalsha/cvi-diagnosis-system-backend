@@ -5,14 +5,14 @@ import lombok.Data;
 
 @Data
 @Entity
-public class DiagnosisStimuliResult {
+public class DiagnosisCharacteristicResult {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Integer frameFrame;
-    private Integer stimuliFrameNumber;
+    private Integer resourceFrameNumber;
     private Integer resultFrameNumber;
     @ManyToOne
-    private DiagnosisStimuli diagnosisStimuli;
+    private DiagnosisCharacteristic diagnosisCharacteristic;
 }

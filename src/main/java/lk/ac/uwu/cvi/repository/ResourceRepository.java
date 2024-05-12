@@ -1,6 +1,6 @@
 package lk.ac.uwu.cvi.repository;
 
-import lk.ac.uwu.cvi.entity.Stimuli;
+import lk.ac.uwu.cvi.entity.Resource;
 import lk.ac.uwu.cvi.enums.Characteristic;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface StimuliRepository extends JpaRepository<Stimuli, Long> {
+public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
-    Optional<Stimuli> findByIdAndCharacteristic(Long id, Characteristic characteristic);
+    Optional<Resource> findByIdAndCharacteristic(Long id, Characteristic characteristic);
 }

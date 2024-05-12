@@ -1,19 +1,19 @@
 package lk.ac.uwu.cvi.service.impl;
 
+import lk.ac.uwu.cvi.dto.request.DiagnosisCharacteristicResultRequestDTO;
 import lk.ac.uwu.cvi.dto.request.DiagnosisRequestDTO;
-import lk.ac.uwu.cvi.dto.request.DiagnosisStimuliResultRequestDTO;
 import lk.ac.uwu.cvi.dto.request.RequestDTO;
 import lk.ac.uwu.cvi.dto.response.*;
 import lk.ac.uwu.cvi.entity.Diagnosis;
-import lk.ac.uwu.cvi.entity.DiagnosisStimuli;
+import lk.ac.uwu.cvi.entity.DiagnosisCharacteristic;
 import lk.ac.uwu.cvi.entity.Patient;
-import lk.ac.uwu.cvi.entity.Stimuli;
+import lk.ac.uwu.cvi.entity.Resource;
 import lk.ac.uwu.cvi.enums.Characteristic;
 import lk.ac.uwu.cvi.enums.DiagnosisStatus;
+import lk.ac.uwu.cvi.repository.DiagnosisCharacteristicRepository;
 import lk.ac.uwu.cvi.repository.DiagnosisRepository;
-import lk.ac.uwu.cvi.repository.DiagnosisStimuliRepository;
 import lk.ac.uwu.cvi.repository.PatientRepository;
-import lk.ac.uwu.cvi.repository.StimuliRepository;
+import lk.ac.uwu.cvi.repository.ResourceRepository;
 import lk.ac.uwu.cvi.service.DiagnosisService;
 import lk.ac.uwu.cvi.service.ScoreCalculationService;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +33,9 @@ public class DiagnosisServiceImpl implements DiagnosisService {
 
     // REPOSITORIES
     private final PatientRepository patientRepository;
-    private final StimuliRepository stimuliRepository;
+    private final ResourceRepository resourceRepository;
     private final DiagnosisRepository diagnosisRepository;
-    private final DiagnosisStimuliRepository diagnosisStimuliRepository;
+    private final DiagnosisCharacteristicRepository diagnosisCharacteristicRepository;
 
     // SERVICES
     private final ScoreCalculationService scoreCalculationService;
@@ -62,24 +62,24 @@ public class DiagnosisServiceImpl implements DiagnosisService {
 
         Diagnosis finalDiagnosis = diagnosis;
 
-        List<DiagnosisStimuli> diagnosisStimulus = diagnosisRequest.getStimulus().stream().map(s -> {
-            DiagnosisStimuli diagnosisStimuli;
+        List<DiagnosisCharacteristic> diagnosisCharacteristics = diagnosisRequest.getCharacteristicDetails().stream().map(s -> {
+            DiagnosisCharacteristic diagnosisCharacteristic;
             if (s.getId() != null && s.getId() != 0) {
-                diagnosisStimuli = diagnosisStimuliRepository.findById(s.getId()).orElseThrow(() -> generateNotFoundException("Diagnosis Stimuli"));
-                if (!diagnosisStimuli.getStatus().equals(DiagnosisStatus.PENDING))
-                    throw generateCustomServiceException(401, "Can not update diagnose stimuli. It is ongoing or completed!");
+                diagnosisCharacteristic = diagnosisCharacteristicRepository.findById(s.getId()).orElseThrow(() -> generateNotFoundException("Diagnosis Characteristic"));
+                if (!diagnosisCharacteristic.getStatus().equals(DiagnosisStatus.PENDING))
+                    throw generateCustomServiceException(401, "Can not update diagnose characteristic. It is ongoing or completed!");
             } else {
-                diagnosisStimuli = new DiagnosisStimuli();
-                diagnosisStimuli.setStatus(DiagnosisStatus.PENDING);
+                diagnosisCharacteristic = new DiagnosisCharacteristic();
+                diagnosisCharacteristic.setStatus(DiagnosisStatus.PENDING);
             }
-            Stimuli stimuli = stimuliRepository.findByIdAndCharacteristic(s.getStimuliId(), s.getCharacteristic()).orElseThrow(() -> generateNotFoundException("Stimuli"));
-            diagnosisStimuli.setDiagnosis(finalDiagnosis);
-            diagnosisStimuli.setStimuli(stimuli);
-            diagnosisStimuli.setCharacteristic(s.getCharacteristic());
-            return diagnosisStimuli;
+            Resource resource = resourceRepository.findByIdAndCharacteristic(s.getResourceId(), s.getCharacteristic()).orElseThrow(() -> generateNotFoundException("Resource"));
+            diagnosisCharacteristic.setDiagnosis(finalDiagnosis);
+            diagnosisCharacteristic.setResource(resource);
+            diagnosisCharacteristic.setCharacteristic(s.getCharacteristic());
+            return diagnosisCharacteristic;
         }).toList();
 
-        diagnosisStimuliRepository.saveAll(diagnosisStimulus);
+        diagnosisCharacteristicRepository.saveAll(diagnosisCharacteristics);
 
         return getSuccessResponse("Diagnosis details added to the DB!", getDiagnosisResponseFromEntity(finalDiagnosis));
     }
@@ -102,36 +102,37 @@ public class DiagnosisServiceImpl implements DiagnosisService {
 
     @Override
     @Transactional
-    public ResponseDTO startDiagnosisStimuliTest(Long id) {
-        DiagnosisStimuli diagnosisStimuli = diagnosisStimuliRepository.findById(id).orElseThrow(() -> generateNotFoundException("Diagnosis Stimuli"));
-        diagnosisStimuli.setStartDateTime(LocalDateTime.now());
-        diagnosisStimuli.setStatus(DiagnosisStatus.QUEUED);
-        diagnosisStimuli = diagnosisStimuliRepository.save(diagnosisStimuli);
+    public ResponseDTO startDiagnosisCharacteristicTest(Long id) {
+        DiagnosisCharacteristic diagnosisCharacteristic = diagnosisCharacteristicRepository.findById(id).orElseThrow(() -> generateNotFoundException("Diagnosis Characteristic"));
+        diagnosisCharacteristic.setStartDateTime(LocalDateTime.now());
+        diagnosisCharacteristic.setStatus(DiagnosisStatus.QUEUED);
+        diagnosisCharacteristic = diagnosisCharacteristicRepository.save(diagnosisCharacteristic);
 
-        Diagnosis diagnosis = diagnosisStimuli.getDiagnosis();
+        Diagnosis diagnosis = diagnosisCharacteristic.getDiagnosis();
         if (diagnosis.getStartDateTime() == null) {
             diagnosis.setStartDateTime(LocalDateTime.now());
             diagnosis.setStatus(DiagnosisStatus.IN_PROGRESS);
             diagnosisRepository.save(diagnosis);
         }
 
-        return getSuccessResponse("Diagnosis stimuli test is started!", null);
+        return getSuccessResponse("Diagnosis characteristic test is started!", null);
     }
 
     @Override
     @Transactional
-    public ResponseDTO endDiagnosisStimuliTest(RequestDTO request) {
-        DiagnosisStimuliResultRequestDTO resultRequest = (DiagnosisStimuliResultRequestDTO) request;
-        DiagnosisStimuli diagnosisStimuli = diagnosisStimuliRepository.findById(resultRequest.getDiagnosisStimuliId())
-                .orElseThrow(() -> generateNotFoundException("Diagnosis Stimuli"));
-        diagnosisStimuli.setEndDateTime(LocalDateTime.now());
-        diagnosisStimuli.setStatus(DiagnosisStatus.COMPLETED);
+    public ResponseDTO endDiagnosisCharacteristicTest(RequestDTO request) {
+        DiagnosisCharacteristicResultRequestDTO resultRequest = (DiagnosisCharacteristicResultRequestDTO) request;
+        DiagnosisCharacteristic diagnosisCharacteristic = diagnosisCharacteristicRepository.findById(resultRequest.getDiagnosisCharacteristicId())
+                .orElseThrow(() -> generateNotFoundException("Diagnosis Characteristic"));
+        diagnosisCharacteristic.setEndDateTime(LocalDateTime.now());
+        diagnosisCharacteristic.setStatus(DiagnosisStatus.COMPLETED);
         DiagnoseResultResponseDTO result = scoreCalculationService.calculateCharacteristicResult(resultRequest);
-        diagnosisStimuli.setScore(result.score());
-        diagnosisStimuli = diagnosisStimuliRepository.save(diagnosisStimuli);
+        diagnosisCharacteristic.setScore(result.score());
+        diagnosisCharacteristic = diagnosisCharacteristicRepository.save(diagnosisCharacteristic);
+        // TODO MAP RESPONSE DATA
 
-        Diagnosis diagnosis = diagnosisStimuli.getDiagnosis();
-        if (!diagnosisStimuliRepository.existsByEndDateTimeIsNullAndDiagnosisAndIdIsNot(diagnosis, diagnosisStimuli.getId())) {
+        Diagnosis diagnosis = diagnosisCharacteristic.getDiagnosis();
+        if (!diagnosisCharacteristicRepository.existsByEndDateTimeIsNullAndDiagnosisAndIdIsNot(diagnosis, diagnosisCharacteristic.getId())) {
             diagnosis.setEndDateTime(LocalDateTime.now());
             diagnosis.setStatus(DiagnosisStatus.COMPLETED);
             DiagnoseResultResponseDTO diagnoseResult = scoreCalculationService.calculateDiagnosisResult(diagnosis.getId());
@@ -139,18 +140,18 @@ public class DiagnosisServiceImpl implements DiagnosisService {
             diagnosis.setPhase(diagnoseResult.phase());
             diagnosisRepository.save(diagnosis);
         }
-        return getSuccessResponse("Diagnosis stimuli test is completed!", null);
+        return getSuccessResponse("Diagnosis characteristic test is completed!", null);
     }
 
     @Override
-    public ResponseDTO checkDiagnoseStimuliConductStatus() {
-        DiagnosisStimuli currentStimuli = diagnosisStimuliRepository.findTopByStatusOrderByStartDateTimeAsc(DiagnosisStatus.QUEUED);
+    public ResponseDTO checkDiagnosisConductStatus() {
+        DiagnosisCharacteristic currentTest = diagnosisCharacteristicRepository.findTopByStatusOrderByStartDateTimeAsc(DiagnosisStatus.QUEUED);
 
-        DiagnoseStimuliConductResponseDTO result = currentStimuli == null ?
-                new DiagnoseStimuliConductResponseDTO(false, null, null, null, null)
-                : new DiagnoseStimuliConductResponseDTO(true, getCharacteristicId(currentStimuli.getCharacteristic()),
-                currentStimuli.getStimuli().getResourceName(),
-                "", currentStimuli.getId()
+        DiagnoseCharacteristicConductResponseDTO result = currentTest == null ?
+                new DiagnoseCharacteristicConductResponseDTO(false, null, null, null, null)
+                : new DiagnoseCharacteristicConductResponseDTO(true, getCharacteristicId(currentTest.getCharacteristic()),
+                currentTest.getResource().getResourceName(),
+                "", currentTest.getId()
         );
 
         return new ResponseDTO(
@@ -190,12 +191,12 @@ public class DiagnosisServiceImpl implements DiagnosisService {
                 getStimulusForDiagnosis(diagnosis));
     }
 
-    private List<DiagnosisStimuliResponseDTO> getStimulusForDiagnosis(Diagnosis diagnosis) {
-        List<DiagnosisStimuli> diagnosisStimulus = diagnosisStimuliRepository.findAllByDiagnosis_Id(diagnosis.getId());
-        return diagnosisStimulus.stream().map(s -> new DiagnosisStimuliResponseDTO(
+    private List<DiagnosisCharacteristicResponseDTO> getStimulusForDiagnosis(Diagnosis diagnosis) {
+        List<DiagnosisCharacteristic> diagnosisStimulus = diagnosisCharacteristicRepository.findAllByDiagnosis_Id(diagnosis.getId());
+        return diagnosisStimulus.stream().map(s -> new DiagnosisCharacteristicResponseDTO(
                 s.getId(),
-                s.getStimuli().getId(),
-                s.getStimuli().getResourceName(),
+                s.getResource().getId(),
+                s.getResource().getResourceName(),
                 s.getStatus(),
                 s.getCharacteristic(),
                 s.getScore(),
