@@ -151,7 +151,7 @@ public class DiagnosisServiceImpl implements DiagnosisService {
                 new DiagnoseCharacteristicConductResponseDTO(false, null, null, null, null)
                 : new DiagnoseCharacteristicConductResponseDTO(true, getCharacteristicId(currentTest.getCharacteristic()),
                 currentTest.getResource().getResourceName(),
-                "", currentTest.getId()
+                "1080,1920", currentTest.getId()
         );
 
         return new ResponseDTO(

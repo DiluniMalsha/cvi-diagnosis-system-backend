@@ -70,7 +70,7 @@ public class PatientServiceImpl implements PatientService {
                 patient.getFatherName(),
                 patient.getFatherAge(),
                 patient.getOtherComorbidity(),
-                diagnoses == null || diagnoses.isEmpty() ? null : diagnoses.get(0).endDateTime(),
+                diagnoses == null || diagnoses.isEmpty() ? null : diagnoses.get(0).startDateTime(),
                 diagnoses == null ? 0 : diagnoses.size(),
                 diagnoses == null || diagnoses.isEmpty() ? null : diagnoses.get(0).score(),
                 diagnoses == null || diagnoses.isEmpty() ? null : diagnoses.get(0).phase(),

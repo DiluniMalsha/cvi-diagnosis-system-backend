@@ -1,9 +1,6 @@
 package lk.ac.uwu.cvi.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -15,4 +12,7 @@ public class ResourceFrame {
     private Long id;
     private Integer time;
     private Integer frameNumber;
+
+    @ManyToOne
+    private Resource resource;
 }
