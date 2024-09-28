@@ -23,6 +23,6 @@ public class DiagnosisCharacteristic {
     private LocalDateTime endDateTime;
     @ManyToOne
     private Diagnosis diagnosis;
-    @ManyToOne
-    private Resource resource;
+//    @ManyToOne
+//    private Resource resource;
 }

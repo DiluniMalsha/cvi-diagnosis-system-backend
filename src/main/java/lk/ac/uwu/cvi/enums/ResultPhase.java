@@ -1,8 +1,7 @@
 package lk.ac.uwu.cvi.enums;
 
 public enum ResultPhase {
-    NONE,
-    LOW,
-    MID,
-    HIGH
+    PHASE_I,
+    PHASE_II,
+    PHASE_III
 }

@@ -2,20 +2,19 @@ package lk.ac.uwu.cvi.service.impl;
 
 import lk.ac.uwu.cvi.dto.request.DiagnosisCharacteristicResultRequestDTO;
 import lk.ac.uwu.cvi.dto.request.DiagnosisRequestDTO;
+import lk.ac.uwu.cvi.dto.request.DiagnosisScoreUpdateRequestDTO;
 import lk.ac.uwu.cvi.dto.request.RequestDTO;
 import lk.ac.uwu.cvi.dto.response.*;
 import lk.ac.uwu.cvi.entity.Diagnosis;
 import lk.ac.uwu.cvi.entity.DiagnosisCharacteristic;
 import lk.ac.uwu.cvi.entity.Patient;
-import lk.ac.uwu.cvi.entity.Resource;
 import lk.ac.uwu.cvi.enums.Characteristic;
 import lk.ac.uwu.cvi.enums.DiagnosisStatus;
+import lk.ac.uwu.cvi.enums.ResultPhase;
 import lk.ac.uwu.cvi.repository.DiagnosisCharacteristicRepository;
 import lk.ac.uwu.cvi.repository.DiagnosisRepository;
 import lk.ac.uwu.cvi.repository.PatientRepository;
-import lk.ac.uwu.cvi.repository.ResourceRepository;
 import lk.ac.uwu.cvi.service.DiagnosisService;
-import lk.ac.uwu.cvi.service.ScoreCalculationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,12 +33,8 @@ public class DiagnosisServiceImpl implements DiagnosisService {
 
     // REPOSITORIES
     private final PatientRepository patientRepository;
-    private final ResourceRepository resourceRepository;
     private final DiagnosisRepository diagnosisRepository;
     private final DiagnosisCharacteristicRepository diagnosisCharacteristicRepository;
-
-    // SERVICES
-    private final ScoreCalculationService scoreCalculationService;
 
     @Override
     @Transactional
@@ -72,9 +68,7 @@ public class DiagnosisServiceImpl implements DiagnosisService {
                 diagnosisCharacteristic = new DiagnosisCharacteristic();
                 diagnosisCharacteristic.setStatus(DiagnosisStatus.PENDING);
             }
-            Resource resource = resourceRepository.findByIdAndCharacteristic(s.getResourceId(), s.getCharacteristic()).orElseThrow(() -> generateNotFoundException("Resource"));
             diagnosisCharacteristic.setDiagnosis(finalDiagnosis);
-            diagnosisCharacteristic.setResource(resource);
             diagnosisCharacteristic.setCharacteristic(s.getCharacteristic());
             return diagnosisCharacteristic;
         }).toList();
@@ -126,21 +120,93 @@ public class DiagnosisServiceImpl implements DiagnosisService {
                 .orElseThrow(() -> generateNotFoundException("Diagnosis Characteristic"));
         diagnosisCharacteristic.setEndDateTime(LocalDateTime.now());
         diagnosisCharacteristic.setStatus(DiagnosisStatus.COMPLETED);
-        DiagnoseResultResponseDTO result = scoreCalculationService.calculateCharacteristicResult(resultRequest);
-        diagnosisCharacteristic.setScore(result.score());
+        diagnosisCharacteristic.setScore(resultRequest.getResult());
         diagnosisCharacteristic = diagnosisCharacteristicRepository.save(diagnosisCharacteristic);
-        // TODO MAP RESPONSE DATA
 
         Diagnosis diagnosis = diagnosisCharacteristic.getDiagnosis();
         if (!diagnosisCharacteristicRepository.existsByEndDateTimeIsNullAndDiagnosisAndIdIsNot(diagnosis, diagnosisCharacteristic.getId())) {
             diagnosis.setEndDateTime(LocalDateTime.now());
-            diagnosis.setStatus(DiagnosisStatus.COMPLETED);
-            DiagnoseResultResponseDTO diagnoseResult = scoreCalculationService.calculateDiagnosisResult(diagnosis.getId());
-            diagnosis.setScore(diagnoseResult.score());
-            diagnosis.setPhase(diagnoseResult.phase());
+            diagnosis.setStatus(DiagnosisStatus.DIAGNOSTIC_COMPLETE);
             diagnosisRepository.save(diagnosis);
         }
+
         return getSuccessResponse("Diagnosis characteristic test is completed!", null);
+    }
+
+    @Override
+    public ResponseDTO startDiagnosisPhasePrediction(Long diagnosisId) {
+        Diagnosis diagnosis = diagnosisRepository.findTopByStatusAndPhaseIsNullOrderByEndDateTimeAsc(DiagnosisStatus.FINAL_SCORE_PENDING);
+        diagnosis.setStatus(DiagnosisStatus.FINAL_SCORE_PENDING);
+        diagnosisRepository.save(diagnosis);
+        return getSuccessResponse("Diagnosis Phase Prediction Started!", null);
+    }
+
+    @Override
+    public ResponseDTO checkPendingDiagnosisPhase() {
+
+        Diagnosis diagnosis = diagnosisRepository.findTopByStatusAndPhaseIsNullOrderByEndDateTimeAsc(DiagnosisStatus.FINAL_SCORE_PENDING);
+
+        List<DiagnosisCharacteristic> characteristics = diagnosisCharacteristicRepository.findAllByDiagnosis_Id(diagnosis.getId());
+
+        double colorPreference = 0,
+                attentionToLight = 0,
+                attentionToMovement = 0,
+                visualLatency = 0,
+                preferredVisualField = 0,
+                visualComplexity = 0,
+                difficulty_in_distance_viewing = 0,
+                atypicalVisualReflexes = 0,
+                difficultyInVisualNovelty = 0,
+                absenceOfVisualGuidedReach = 0;
+
+        for (DiagnosisCharacteristic c : characteristics) {
+            switch (c.getCharacteristic()) {
+                case COLOR_PREFERENCE -> colorPreference = c.getScore();
+                case ATTENTION_TO_LIGHT -> attentionToLight = c.getScore();
+                case ATTENTION_TO_MOVEMENT -> attentionToMovement = c.getScore();
+                case VISUAL_LATENCY -> visualLatency = c.getScore();
+                case PREFERRED_VISUAL_FIELD -> preferredVisualField = c.getScore();
+                case VISUAL_COMPLEXITY -> visualComplexity = c.getScore();
+                case DIFFICULTY_IN_DISTANCE_VIEWING -> difficulty_in_distance_viewing = c.getScore();
+                case ATYPICAL_VISUAL_REFLEXES -> atypicalVisualReflexes = c.getScore();
+                case DIFFICULTY_IN_VISUAL_NOVELTY -> difficultyInVisualNovelty = c.getScore();
+                case ABSENCE_OF_VISUAL_GUIDED_REACH -> absenceOfVisualGuidedReach = c.getScore();
+            }
+        }
+
+        return getSuccessResponse(null, new PendingDiagnosisCheckResponseDTO(diagnosis.getId(),
+                colorPreference,
+                attentionToLight,
+                attentionToMovement,
+                visualLatency,
+                preferredVisualField,
+                visualComplexity,
+                difficulty_in_distance_viewing,
+                atypicalVisualReflexes,
+                difficultyInVisualNovelty,
+                absenceOfVisualGuidedReach
+        ));
+    }
+
+    @Override
+    public ResponseDTO updateDiagnosisPhase(DiagnosisScoreUpdateRequestDTO request) {
+        Optional<Diagnosis> optionalDiagnosis = diagnosisRepository.findById(request.getDiagnosisId());
+        if (optionalDiagnosis.isPresent()) {
+            Diagnosis diagnosis = optionalDiagnosis.get();
+            diagnosis.setPhase(getPhaseById(request.getPhase()));
+            diagnosis.setStatus(DiagnosisStatus.COMPLETED);
+            diagnosisRepository.save(diagnosis);
+        }
+        return getSuccessResponse("Diagnosis result updated!", null);
+    }
+
+    private ResultPhase getPhaseById(Integer phase) {
+        return switch (phase) {
+            case 1 -> ResultPhase.PHASE_I;
+            case 2 -> ResultPhase.PHASE_II;
+            case 3 -> ResultPhase.PHASE_III;
+            default -> null;
+        };
     }
 
     @Override
@@ -148,10 +214,9 @@ public class DiagnosisServiceImpl implements DiagnosisService {
         DiagnosisCharacteristic currentTest = diagnosisCharacteristicRepository.findTopByStatusOrderByStartDateTimeAsc(DiagnosisStatus.QUEUED);
 
         DiagnoseCharacteristicConductResponseDTO result = currentTest == null ?
-                new DiagnoseCharacteristicConductResponseDTO(false, null, null, null, null)
+                new DiagnoseCharacteristicConductResponseDTO(false, null, null)
                 : new DiagnoseCharacteristicConductResponseDTO(true, getCharacteristicId(currentTest.getCharacteristic()),
-                currentTest.getResource().getResourceName(),
-                "1080,1920", currentTest.getId()
+                currentTest.getId()
         );
 
         return new ResponseDTO(
@@ -195,8 +260,6 @@ public class DiagnosisServiceImpl implements DiagnosisService {
         List<DiagnosisCharacteristic> diagnosisStimulus = diagnosisCharacteristicRepository.findAllByDiagnosis_Id(diagnosis.getId());
         return diagnosisStimulus.stream().map(s -> new DiagnosisCharacteristicResponseDTO(
                 s.getId(),
-                s.getResource().getId(),
-                s.getResource().getResourceName(),
                 s.getStatus(),
                 s.getCharacteristic(),
                 s.getScore(),

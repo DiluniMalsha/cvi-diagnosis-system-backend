@@ -4,5 +4,7 @@ public enum DiagnosisStatus {
     PENDING,
     QUEUED,
     IN_PROGRESS,
+    DIAGNOSTIC_COMPLETE,
+    FINAL_SCORE_PENDING,
     COMPLETED
 }

@@ -1,5 +1,6 @@
 package lk.ac.uwu.cvi.service;
 
+import lk.ac.uwu.cvi.dto.request.DiagnosisScoreUpdateRequestDTO;
 import lk.ac.uwu.cvi.dto.request.RequestDTO;
 import lk.ac.uwu.cvi.dto.response.DiagnosisResponseDTO;
 import lk.ac.uwu.cvi.dto.response.ResponseDTO;
@@ -17,6 +18,12 @@ public interface DiagnosisService extends CommonService {
 
     @Transactional
     ResponseDTO endDiagnosisCharacteristicTest(RequestDTO request);
+
+    ResponseDTO startDiagnosisPhasePrediction(Long diagnosisId);
+
+    ResponseDTO checkPendingDiagnosisPhase();
+
+    ResponseDTO updateDiagnosisPhase(DiagnosisScoreUpdateRequestDTO request);
 
     ResponseDTO checkDiagnosisConductStatus();
 
